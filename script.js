@@ -4,15 +4,15 @@ $(document).ready(function(){
   var deck = ["bay.jpg", "grape.jpg", "japanese-maple.jpg", "linden.jpg", "maple.jpg", "pear.jpg"]
 
   // get images
-  $.ajax({
-    url: 'images/',
-    success: function (data) {
-      $(data).find('a:contains(".jpg"),a:contains(" + .png + ")').each(function () {
-        var imgName = this.text.toString();
-        deck.push(imgName);
-       });
-     }
-  });
+  // $.ajax({
+  //   url: 'images/',
+  //   success: function (data) {
+  //     $(data).find('a:contains(".jpg"),a:contains(" + .png + ")').each(function () {
+  //       var imgName = this.text.toString();
+  //       deck.push(imgName);
+  //      });
+  //    }
+  // });
 
   // shuffle function
   function shuffle(o){ //v1.0
@@ -28,9 +28,10 @@ $(document).ready(function(){
   $('#create-deck').click(function(){
     //clear deck
     $('#deck').html("");
-    //clear turns
+    //clear turns and score
     turns = 0;
     updateTurns(0);
+    calculateScore('reset');
     // duplicate and shuffle deck
     var dblDeck = deck.concat(deck);
     // shuffle deck
@@ -49,7 +50,7 @@ $(document).ready(function(){
     return $('#turns p').html(turns);
   }
 
-  function calculateScore(){
+  function calculateScore(reset){
     var result = parseInt((target/turns)*100);
     if(result >= 60 && result <= 99){
       show("Very good");
@@ -57,12 +58,13 @@ $(document).ready(function(){
       show("Perfect!");
     } else if(result < 30){
       show("Poor");
+    } else if(reset){
+       $('#score p').html("");
     } else{
       show("Good");
     }
     function show(message){
-      $('#score p').prepend(result + "%");
-      $('#score p span').append(" (" +message+")");
+      $('#score p').html(result + "% <span>(" + message + ")</span>");
     }
   }
 

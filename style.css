@@ -68,7 +68,7 @@ p span{color: green;}
   transition: transform 0.9s;
 }
 .front{
-  background: url('pattern.jpg');
+  background: white url('pattern.jpg');
   background-size: 80%;
   box-shadow: -0.5px 4px 5px 1px rgba(0, 0, 0, 0.5);
   transform: rotateX(40deg);
