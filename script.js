@@ -1,7 +1,7 @@
 // NB To overcome CORS, run a server with python -m SimpleHTTPServer
 $(document).ready(function(){
 
-  var deck = []
+  var deck = ["bay.jpg", "grape.jpg", "japanese-maple.jpg", "linden.jpg", "maple.jpg", "pear.jpg"]
 
   // get images
   $.ajax({
