@@ -5,7 +5,7 @@ $(document).ready(function(){
 
   // get images
   $.ajax({
-    url: 'images/',
+    url: '/images/',
     success: function (data) {
       $(data).find('a:contains(".jpg"),a:contains(" + .png + ")').each(function () {
         var imgName = this.text.toString();
