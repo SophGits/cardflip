@@ -1,56 +1,83 @@
-// NB To overcome CORS, run a server with python -m SimpleHTTPServer
-$(document).ready(function(){
+window.onload = function() {
 
-  var deck = ["bay.jpg", "grape.jpg", "japanese-maple.jpg", "linden.jpg", "maple.jpg", "pear.jpg"]
+  var deck = [
+    "bay.jpg", 
+    "grape.jpg", 
+    "japanese-maple.jpg", 
+    "linden.jpg", 
+    "maple.jpg", 
+    "pear.jpg"
+  ];
 
-  // get images
-  // $.ajax({
-  //   url: 'images/',
-  //   success: function (data) {
-  //     $(data).find('a:contains(".jpg"),a:contains(" + .png + ")').each(function () {
-  //       var imgName = this.text.toString();
-  //       deck.push(imgName);
-  //      });
-  //    }
-  // });
-
-  // shuffle function
-  function shuffle(o){ //v1.0
+  function shuffle(o){ 
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
   };
 
+  var game = {};
+  game.$deck = document.getElementById('deck');
   // scoring
   var turns = 0;
   var target;
 
   // start new game
-  $('#create-deck').click(function(){
-    //clear deck
-    $('#deck').html("");
-    //clear turns and score
-    turns = 0;
+  var $createDeck = document.getElementById('create-deck');
+  $createDeck.addEventListener('click', createDeck);
+
+  function createDeck() {
+
+    // clear view, turns and score
+    var turns = 0;
     updateTurns(0);
+    game.$deck.innerHTML = '';
     calculateScore('reset');
+
     // duplicate and shuffle deck
     var dblDeck = deck.concat(deck);
-    // shuffle deck
     dblDeck = shuffle(dblDeck);
-    // create deck
-    $(dblDeck).each(function(){
-      $('#deck').append('<div class="container"><div class="card"><div class="front"></div><div class="back"><img src="images/'+this+'"/></div></div></div>')
+
+    dblDeck.forEach(function(val, i){
+
+      var $container = document.createElement('div');
+      $container.className = 'container';
+      game.$deck.appendChild($container);
+
+      var $card = document.createElement('div');
+      $card.className = 'card';
+      $container.appendChild($card);
+
+      var $front = document.createElement('div');
+      $front.className = 'front';
+      $card.appendChild($front);
+
+      var $back = document.createElement('div');
+      $back.className = 'back';
+      $card.appendChild($back);
+
+      var $image = document.createElement('img');
+      $image.src = '/images/leaves/' + val;
+      $back.appendChild($image);
+
+      $card.addEventListener('click', handleCardClick);
+
     });
     target = deck.length * 2;
-    $('#target p').html(target);
+
+    var $target = document.getElementById('target');
+    $target.children[0].innerHTML = target; //[0] is p
     return target;
-  });
+  };
 
   function updateTurns(num){
-    turns+=num;
-    return $('#turns p').html(turns);
+    turns += num;
+    var $turns = document.getElementById('turns');
+    $turns.children[0].innerHTML = turns;
+    return $turns;
   }
 
   function calculateScore(reset){
+    var $scorePara = document.getElementById('score').children[0];
+
     var result = parseInt((target/turns)*100);
     if(result >= 60 && result <= 99){
       show("Very good");
@@ -59,21 +86,22 @@ $(document).ready(function(){
     } else if(result < 30){
       show("Poor");
     } else if(reset){
-       $('#score p').html("");
+       $scorePara.innerHTML = '';
     } else{
       show("Good");
     }
     function show(message){
-      $('#score p').html(result + "% <span>(" + message + ")</span>");
+      $scorePara.innerHTML = result + "% <span>(" + message + ")</span>";
     }
   }
 
   function endGame(){
-    // for(i=0; i < target; i++){
-    //   var deg = i*0.2*30;
-    //   $('.card')[i].style.transform = "rotateY(-"+deg+"deg)";
-    // }
-    //don't forget these browsers:
+    var $cards = document.getElementsByClassName('card');
+    for(i=0; i < target; i++){
+      var deg = i*0.2*30;
+      $cards[i].style.transform = "rotateY(-"+deg+"deg)";
+    }
+    // don't forget these browsers:
     // div.style.webkitTransform = 'rotate('+deg+'deg)';
     // div.style.mozTransform    = 'rotate('+deg+'deg)';
     // div.style.msTransform     = 'rotate('+deg+'deg)';
@@ -81,50 +109,64 @@ $(document).ready(function(){
   }
 
   // select a card
-  $('section').on("click", ".card", function(e){
-
+  function handleCardClick(e) {
     e.preventDefault();
 
-    if($('.flipped').length >= 2) {
+    $flippedCards = document.getElementsByClassName('flipped'); //.card.flipped
+    $matchedCards = document.getElementsByClassName('matched'); //.card.matched
 
-      $('.card').removeClass('flipped')
-      $(this).addClass('flipped');
-      console.log('case1'); // basically never happens
+    if($flippedCards.length >= 2) {
+      // $('.card').removeClass('flipped')
+      // $(this).addClass('flipped');
+      // console.log('case1'); // basically never happens
 
-    } else if($('.flipped').length === 1) {
+    } else if($flippedCards.length === 1) {
 
-        var flippedCard = $('.flipped')[0]["innerHTML"];
-        var img = $(this, 'div img')[0]["innerHTML"];
+        var flippedSrc = $flippedCards[0].children[1].children[0].src;
+        var imgsrc = e.target.parentElement.children[1].children[0].src; // think this is checking the images of the flipped cards are the same
 
-        if($('.matched').length === ((deck.length)*2) -2){
-          $('.card').removeClass('matched').addClass('matched').addClass('complete');
+        var imagesDir = '/images/';
+        imgsrc = imgsrc.slice(imgsrc.indexOf(imagesDir) + imagesDir.length);
+        flippedSrc = flippedSrc.slice(flippedSrc.indexOf(imagesDir) + imagesDir.length);
+
+        if($matchedCards.length === ((deck.length)*2) -2){
+          var $cards = document.getElementsByClassName('card');
+
+          for(var i=0;i<$cards.length;i++) {
+            $cards[i].classList.remove('matched');
+            $cards[i].classList.add('matched');
+            $cards[i].classList.add('complete');
+          };
           updateTurns(1);
           calculateScore();
           endGame();
           // console.log('case2')
 
-        } else if(img === flippedCard) {
-          $(this).addClass('matched');
-          $('.flipped').removeClass('flipped').addClass('matched');
+        } else if(imgsrc === flippedSrc) {
+          e.target.parentElement.classList.add('matched');
+          $flippedCards[0].classList.add('matched');
+          $flippedCards[0].classList.remove('flipped');
           updateTurns(1);
           // console.log('case3')
 
         } else {
-          $(this).addClass('flipped')
-            setTimeout("($('.flipped').removeClass('flipped'));", 400);
+            e.target.parentElement.classList.add('flipped');
+            setTimeout(function() {
+              var length =  $flippedCards.length;
+              for(var i=0; i < length; i++) {
+                $flippedCards[0].classList.remove('flipped');
+              };
+            }, 400);
             updateTurns(1);
             // console.log('case4')
         }
 
       } else {
-      $(this).addClass('flipped');
+      e.target.parentElement.classList.add('flipped');
       updateTurns(1);
       // console.log('case5')
     }
-  });
+  };
 
-});
-
-$(document).ready(function(){
-  setTimeout("$('#create-deck').click();", 100);
-})
+  setTimeout(createDeck(), 100);
+};
